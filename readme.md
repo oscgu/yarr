@@ -7,6 +7,13 @@ The app is a single binary with an embedded database (SQLite).
 
 ![screenshot](etc/promo.png)
 
+## my changes
+
+- otp (-otpsecret, $YARR_OTP_SECRET)
+- bump go to 1.21
+- non root docker container
+- rm vendor folder
+
 ## usage
 
 The latest prebuilt binaries for Linux/MacOS/Windows AMD64 are available
