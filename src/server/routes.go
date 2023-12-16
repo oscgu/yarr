@@ -31,10 +31,11 @@ func (s *Server) handler() http.Handler {
 
 	if s.Username != "" && s.Password != "" {
 		a := &auth.Middleware{
-			BasePath: s.BasePath,
-			Username: s.Username,
-			Password: s.Password,
-			Public:   []string{"/static", "/fever"},
+			BasePath:  s.BasePath,
+			Username:  s.Username,
+			Password:  s.Password,
+			Public:    []string{"/static", "/fever"},
+			OtpSecret: s.OtpSecret,
 		}
 		r.Use(a.Handler)
 	}

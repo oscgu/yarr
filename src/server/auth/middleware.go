@@ -6,17 +6,15 @@ import (
 
 	"github.com/nkanaev/yarr/src/assets"
 	"github.com/nkanaev/yarr/src/server/router"
+	"github.com/pquerna/otp/totp"
 )
 
 type Middleware struct {
-	Username string
-	Password string
-	BasePath string
-	Public   []string
-}
-
-func unsafeMethod(method string) bool {
-	return method == "POST" || method == "PUT" || method == "DELETE"
+	Username  string
+	Password  string
+	OtpSecret string
+	BasePath  string
+	Public    []string
 }
 
 func (m *Middleware) Handler(c *router.Context) {
@@ -41,14 +39,15 @@ func (m *Middleware) Handler(c *router.Context) {
 	if c.Req.Method == "POST" {
 		username := c.Req.FormValue("username")
 		password := c.Req.FormValue("password")
-		if StringsEqual(username, m.Username) && StringsEqual(password, m.Password) {
+		passcode := c.Req.FormValue("passcode")
+		if StringsEqual(username, m.Username) && StringsEqual(password, m.Password) && (totp.Validate(passcode, m.OtpSecret) || m.OtpSecret == "") {
 			Authenticate(c.Out, m.Username, m.Password, m.BasePath)
 			c.Redirect(rootUrl)
 			return
 		} else {
 			c.HTML(http.StatusOK, assets.Template("login.html"), map[string]string{
 				"username": username,
-				"error":    "Invalid username/password",
+				"error":    "Invalid username/password/otp",
 			})
 			return
 		}

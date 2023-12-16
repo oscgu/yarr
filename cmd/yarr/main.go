@@ -31,7 +31,7 @@ func opt(envVar, defaultValue string) string {
 
 func parseAuthfile(authfile io.Reader) (username, password string, err error) {
 	scanner := bufio.NewScanner(authfile)
-	for scanner.Scan() {
+	if scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) != 2 {
@@ -39,7 +39,6 @@ func parseAuthfile(authfile io.Reader) (username, password string, err error) {
 		}
 		username = parts[0]
 		password = parts[1]
-		break
 	}
 	return username, password, nil
 }
@@ -47,7 +46,7 @@ func parseAuthfile(authfile io.Reader) (username, password string, err error) {
 func main() {
 	platform.FixConsoleIfNeeded()
 
-	var addr, db, authfile, auth, certfile, keyfile, basepath, logfile string
+	var addr, db, authfile, auth, certfile, keyfile, basepath, logfile, otpsecret string
 	var ver, open bool
 
 	flag.CommandLine.SetOutput(os.Stdout)
@@ -70,6 +69,7 @@ func main() {
 	flag.StringVar(&logfile, "log-file", opt("YARR_LOGFILE", ""), "`path` to log file to use instead of stdout")
 	flag.BoolVar(&ver, "version", false, "print application version")
 	flag.BoolVar(&open, "open", false, "open the server in browser")
+	flag.StringVar(&otpsecret, "otpsecret", opt("YARR_OTP_SECRET", ""), "otpsecret")
 	flag.Parse()
 
 	if ver {
@@ -145,6 +145,10 @@ func main() {
 	if username != "" && password != "" {
 		srv.Username = username
 		srv.Password = password
+	}
+
+	if otpsecret != "" {
+		srv.OtpSecret = otpsecret
 	}
 
 	log.Printf("starting server at %s", srv.GetAddr())
